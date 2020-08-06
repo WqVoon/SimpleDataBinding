@@ -50,6 +50,7 @@
 
     function compile (vm, el) {
         debug("开始编译 DomTree");
+        compile.vm = vm;
         scanSelfAndChildNodes(el);
         debug("DomTree 编译结束");
     }
@@ -73,10 +74,11 @@
         var tokens = parseText(el.wholeText);
         if (!! tokens.haveValidToken) {
             var frag = document.createDocumentFragment();
-            tokens.forEach(function (textContent) {
-                var tmpToken = textContent.isValidToken?
-                    createValidTextNode(el): document.createTextNode(el);
-                frag.appendChild(tmpToken);
+            tokens.forEach(function (token) {
+                var tmpNode = token.isValid?
+                    createValidTextNode(token.value):
+                    document.createTextNode(token.value);
+                frag.appendChild(tmpNode);
             });
             el.parentNode.replaceChild(frag, el);
         }
@@ -85,8 +87,9 @@
     /**
      * 对有效的 token 在生成 textNode 的同时绑定一个 Watcher 对象
      */
-    function createValidTextNode (el) {
-        var textNode = document.createTextNode(el);
+    function createValidTextNode (textContent) {
+        debug(`用 ${textContent} 调用了 createValidTextNode`);
+        var textNode = document.createTextNode(compile.vm[textContent]);
         return textNode;
     }
 
@@ -105,20 +108,33 @@
         debug(`开始解析 ${str}`);
 
         while (!! (result = reg.exec(str))) {
-            if (result.index > preIndex)
-                tokens.push(str.slice(preIndex, result.index));
+            if (result.index > preIndex) {
+                var value = str.slice(preIndex, result.index);
+                tokens.push(makeToken(value, false));
+            }
 
-            var tokenName = result[1];
-            debug(` - ${tokenName}(${typeof tokenName}) 是一个有效 token`);
-            tokenName.isValidToken = true;
-            tokens.push(result[1]);
+            debug(` - ${result[1]} 是一个有效 token`);
+            tokens.push(makeToken(result[1].trim(), true));
             preIndex = reg.lastIndex;
             tokens.haveValidToken = true;
         }
-        preIndex === str.length || tokens.push(str.slice(preIndex));
+        preIndex === str.length || tokens.push(makeToken(str.slice(preIndex), false));
 
         debug(`tokens(${tokens.length}): ${tokens.join('|')}`);
         return tokens;
+    }
+
+    /**
+     * 制作一个对象用于存储 token 的信息
+     */
+    function makeToken (value, isValid) {
+        return {
+            value: value,
+            isValid: isValid,
+            toString: function () {
+                return this.value;
+            }
+        };
     }
 
     function SDB (options) {
