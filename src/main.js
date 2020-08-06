@@ -47,7 +47,7 @@ SDB.prototype._proxy = function () {
 }
 
 /**
- * 解析 SDB.$el 及其 childNodes 中的 textNode
+ * 解析 SDB.$el 及其 childNodes 中的 textNode；
  * 为每个有效的 token 设置一个 Watcher
  */
 SDB.prototype._compile = function () {
@@ -55,8 +55,8 @@ SDB.prototype._compile = function () {
 }
 
 /**
- * 向 SDB._watchers 中添加一个 Watcher 对象
- * data 指该 Watcher 对象观察的值对应 SDB.$data 中的属性名
+ * 向 SDB._watchers 中添加一个 Watcher 对象；
+ * data 指该 Watcher 对象观察的值对应 SDB.$data 中的属性名；
  * node 指一个具体的 textNode
  */
 SDB.prototype._addWatcher = function (data, node) {

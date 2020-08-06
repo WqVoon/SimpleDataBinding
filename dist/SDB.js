@@ -86,37 +86,6 @@
         });
     }
 
-    function Watcher (vm, data, node) {
-        this._init(vm, data, node);
-    }
-
-    Watcher.prototype._init = function (vm, data, node) {
-        this.vm = vm;
-        this.data = data;
-        this.node = node;
-        this.depended = false;
-        this.tokenContent = node.textContent;
-    };
-
-    /**
-     * 更新对应的 textNode 里的内容，改变视图
-     */
-    Watcher.prototype.update = function () {
-        this.node.textContent = this.vm[this.data];
-    };
-
-    /**
-     * 将 Dep.target 赋值为自身，再触发 data 对应的 getter
-     * 从而使其调用 Dep.depend 来让 Dep 与当前 Watcher 绑定
-     * 此时 Dep.notify 就可以通知到当前 Watcher
-     */
-    Watcher.prototype.bind = function () {
-        debug(`开始绑定 ${this.data}`);
-        Dep.target = this;
-        this.vm[this.data];
-        Dep.target = null;
-    };
-
     function compile (vm, el) {
         debug("开始编译 DomTree");
         compile.vm = vm;
@@ -128,7 +97,7 @@
     }
 
     /**
-     * 遍历当前 node 以及其子节点
+     * 遍历当前 node 以及其子节点；
      * 在遇到 textNode 时对其调用 handleTextNode
      */
     function scanSelfAndChildNodes(el) {
@@ -172,9 +141,9 @@
     var reg = /{{([^{}]+)}}/g;
 
     /**
-     * 将 str 根据 {{...}} 来拆分成多个 token 并返回
-     * {{...}} 的 token 其 isValidToken 属性为 true，其他 token 没有该属性
-     * 如果存在具有 tag 属性的 token ，那么返回的数组中属性 haveValidToken 为 true
+     * 将 str 根据 {{...}} 来拆分成多个 token 并返回；
+     * {{...}} 的 token 其 isValid 属性为 true，其他 token 该属性为 false；
+     * 如果存在 isValid 属性为 true 的 token ，那么返回的数组中属性 haveValidToken 为 true
      */
     function parseText(str) {
         var result = null, tokens = [], preIndex = 0;
@@ -209,6 +178,37 @@
             }
         };
     }
+
+    function Watcher (vm, data, node) {
+        this._init(vm, data, node);
+    }
+
+    Watcher.prototype._init = function (vm, data, node) {
+        this.vm = vm;
+        this.data = data;
+        this.node = node;
+        this.depended = false;
+        this.tokenContent = node.textContent;
+    };
+
+    /**
+     * 更新对应的 textNode 里的内容，改变视图
+     */
+    Watcher.prototype.update = function () {
+        this.node.textContent = this.vm[this.data];
+    };
+
+    /**
+     * 将 Dep.target 赋值为自身，再触发 data 对应的 getter
+     * 从而使其调用 Dep.depend 来让 Dep 与当前 Watcher 绑定
+     * 此时 Dep.notify 就可以通知到当前 Watcher
+     */
+    Watcher.prototype.bind = function () {
+        debug(`开始绑定 ${this.data}`);
+        Dep.target = this;
+        this.vm[this.data];
+        Dep.target = null;
+    };
 
     function SDB (options) {
         this._init(options);
@@ -254,7 +254,7 @@
     };
 
     /**
-     * 解析 SDB.$el 及其 childNodes 中的 textNode
+     * 解析 SDB.$el 及其 childNodes 中的 textNode；
      * 为每个有效的 token 设置一个 Watcher
      */
     SDB.prototype._compile = function () {
@@ -262,8 +262,8 @@
     };
 
     /**
-     * 向 SDB._watchers 中添加一个 Watcher 对象
-     * data 指该 Watcher 对象观察的值对应 SDB.$data 中的属性名
+     * 向 SDB._watchers 中添加一个 Watcher 对象；
+     * data 指该 Watcher 对象观察的值对应 SDB.$data 中的属性名；
      * node 指一个具体的 textNode
      */
     SDB.prototype._addWatcher = function (data, node) {

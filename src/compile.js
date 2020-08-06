@@ -11,7 +11,7 @@ export default function compile (vm, el) {
 }
 
 /**
- * 遍历当前 node 以及其子节点
+ * 遍历当前 node 以及其子节点；
  * 在遇到 textNode 时对其调用 handleTextNode
  */
 function scanSelfAndChildNodes(el) {
@@ -55,9 +55,9 @@ function createValidTextNode (textContent) {
 var reg = /{{([^{}]+)}}/g;
 
 /**
- * 将 str 根据 {{...}} 来拆分成多个 token 并返回
- * {{...}} 的 token 其 isValidToken 属性为 true，其他 token 没有该属性
- * 如果存在具有 tag 属性的 token ，那么返回的数组中属性 haveValidToken 为 true
+ * 将 str 根据 {{...}} 来拆分成多个 token 并返回；
+ * {{...}} 的 token 其 isValid 属性为 true，其他 token 该属性为 false；
+ * 如果存在 isValid 属性为 true 的 token ，那么返回的数组中属性 haveValidToken 为 true
  */
 function parseText(str) {
     var result = null, tokens = [], preIndex = 0;
