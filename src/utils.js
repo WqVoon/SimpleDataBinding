@@ -12,5 +12,5 @@ export function copyArray (preArray) {
 }
 
 export var config = {
-    debugMode: true
+    debugMode: false
 };

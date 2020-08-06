@@ -7,16 +7,48 @@
 </head>
 <body>
     <div id="app">
-        {{name}}: {{hobby}}
+        <h1>{{name}}'s Information</h1>
+        <table style="text-align: left">
+            <tr>
+                <th>Name:</th> <th>{{name}}</th>
+            </tr>
+            <tr>
+                <th>age:</th> <th>{{age}}</th>
+            </tr>
+            <tr>
+                <th>Hobby:</th> <th>{{hobby}}</th>
+            </tr>
+        </table>
+        <button onclick="nextPerson()">Next</button>
     </div>
+
     <script>
         var vm = new SDB({
             el: "#app",
             data: {
                 name: "Yuren",
+                age: 'x',
                 hobby: "Program"
             }
         });
+
+        /**
+         * 用来循环切换人物的函数，绑定在 button 的 click 事件上
+         */
+        var nextPerson = (function () {
+            var index = 0, persons = [
+                {name: "Yuren", hobby: "Program"},
+                {name: "shiqing233", hobby: "Game"},
+                {name: "stupid-boy", hobby: "Drawing"},
+                {name: "hsyzm", hobby: "Reading"}
+            ];
+            return function () {
+                index = (index + 1) % persons.length;
+                vm.name = persons[index].name;
+                vm.age = Math.floor(Math.random() * 100);
+                vm.hobby = persons[index].hobby;
+            }
+        })();
     </script>
 </body>
 </html>

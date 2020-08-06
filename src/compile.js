@@ -4,6 +4,9 @@ export default function compile (vm, el) {
     debug("开始编译 DomTree");
     compile.vm = vm;
     scanSelfAndChildNodes(el);
+    vm._watchers.forEach(function (w) {
+        w.bind();
+    });
     debug("DomTree 编译结束");
 }
 
@@ -42,6 +45,7 @@ function handleTextNode(el) {
 function createValidTextNode (textContent) {
     debug(`用 ${textContent} 调用了 createValidTextNode`);
     var textNode = document.createTextNode(compile.vm[textContent]);
+    compile.vm._addWatcher(textContent, textNode);
     return textNode;
 }
 
@@ -72,7 +76,7 @@ function parseText(str) {
     }
     preIndex === str.length || tokens.push(makeToken(str.slice(preIndex), false));
 
-    debug(`tokens(${tokens.length}): ${tokens.join('|')}`);
+    debug(`解析结果: tokens(${tokens.length}): ${tokens.join('|')}`);
     return tokens;
 }
 

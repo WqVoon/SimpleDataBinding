@@ -18,7 +18,42 @@
     }
 
     var config = {
-        debugMode: true
+        debugMode: false
+    };
+
+    function Dep () {
+        this._init();
+    }
+
+    Dep.target = null;
+
+    Dep.prototype._init = function () {
+        this.subs = [];
+    };
+
+    Dep.prototype._addWatcher = function (w) {
+        this.subs.push(w);
+    };
+
+    /**
+     * 通知 this.subs 中的所有 Watcher 执行更新
+     */
+    Dep.prototype.notify = function () {
+        debug(`调用了 Dep.notify`);
+        this.subs.forEach(function (w) {
+            w.update();
+        });
+    };
+
+    /**
+     * 如果 Dep.target 尚未与某个 Dep 绑定，则与它建立绑定关系
+     */
+    Dep.prototype.depend = function () {
+        debug(`调用了 Dep.depend`);
+        if (! Dep.target.depended) {
+            this._addWatcher(Dep.target);
+            Dep.target.depended = true;
+        }
     };
 
     /**
@@ -35,23 +70,60 @@
      */
     function defineReactive (obj, prop) {
         var preValue = obj[prop];
+        var dep = new Dep();
         Object.defineProperty(obj, prop, {
             get: function () {
                 debug(`用 $data.${prop} 调用了 getter`);
+                Dep.target && dep.depend();
                 return preValue;
             },
             set: function (newValue) {
                 debug(`用 $data.${prop} 调用了 setter`);
                 if (preValue === newValue) return null;
                 preValue = newValue;
+                dep.notify();
             }
         });
     }
+
+    function Watcher (vm, data, node) {
+        this._init(vm, data, node);
+    }
+
+    Watcher.prototype._init = function (vm, data, node) {
+        this.vm = vm;
+        this.data = data;
+        this.node = node;
+        this.depended = false;
+        this.tokenContent = node.textContent;
+    };
+
+    /**
+     * 更新对应的 textNode 里的内容，改变视图
+     */
+    Watcher.prototype.update = function () {
+        this.node.textContent = this.vm[this.data];
+    };
+
+    /**
+     * 将 Dep.target 赋值为自身，再触发 data 对应的 getter
+     * 从而使其调用 Dep.depend 来让 Dep 与当前 Watcher 绑定
+     * 此时 Dep.notify 就可以通知到当前 Watcher
+     */
+    Watcher.prototype.bind = function () {
+        debug(`开始绑定 ${this.data}`);
+        Dep.target = this;
+        this.vm[this.data];
+        Dep.target = null;
+    };
 
     function compile (vm, el) {
         debug("开始编译 DomTree");
         compile.vm = vm;
         scanSelfAndChildNodes(el);
+        vm._watchers.forEach(function (w) {
+            w.bind();
+        });
         debug("DomTree 编译结束");
     }
 
@@ -90,6 +162,7 @@
     function createValidTextNode (textContent) {
         debug(`用 ${textContent} 调用了 createValidTextNode`);
         var textNode = document.createTextNode(compile.vm[textContent]);
+        compile.vm._addWatcher(textContent, textNode);
         return textNode;
     }
 
@@ -120,7 +193,7 @@
         }
         preIndex === str.length || tokens.push(makeToken(str.slice(preIndex), false));
 
-        debug(`tokens(${tokens.length}): ${tokens.join('|')}`);
+        debug(`解析结果: tokens(${tokens.length}): ${tokens.join('|')}`);
         return tokens;
     }
 
@@ -152,6 +225,7 @@
     SDB.prototype._init = function (options) {
         this.$el = document.querySelector(options.el);
         this.$data = options.data;
+        this._watchers = [];
     };
 
     /**
@@ -185,6 +259,15 @@
      */
     SDB.prototype._compile = function () {
         compile(this, this.$el);
+    };
+
+    /**
+     * 向 SDB._watchers 中添加一个 Watcher 对象
+     * data 指该 Watcher 对象观察的值对应 SDB.$data 中的属性名
+     * node 指一个具体的 textNode
+     */
+    SDB.prototype._addWatcher = function (data, node) {
+        this._watchers.push(new Watcher(this, data, node));
     };
 
     /**

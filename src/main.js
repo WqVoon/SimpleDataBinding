@@ -1,6 +1,7 @@
 import observe from "./observe"
 import {config} from "./utils"
 import compile from "./compile";
+import Watcher from "./watcher";
 
 export default function SDB (options) {
     this._init(options);
@@ -17,6 +18,7 @@ SDB.config = config;
 SDB.prototype._init = function (options) {
     this.$el = document.querySelector(options.el);
     this.$data = options.data;
+    this._watchers = [];
 }
 
 /**
@@ -50,6 +52,15 @@ SDB.prototype._proxy = function () {
  */
 SDB.prototype._compile = function () {
     compile(this, this.$el);
+}
+
+/**
+ * 向 SDB._watchers 中添加一个 Watcher 对象
+ * data 指该 Watcher 对象观察的值对应 SDB.$data 中的属性名
+ * node 指一个具体的 textNode
+ */
+SDB.prototype._addWatcher = function (data, node) {
+    this._watchers.push(new Watcher(this, data, node));
 }
 
 /**
