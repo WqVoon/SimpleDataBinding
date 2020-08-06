@@ -9,7 +9,7 @@
     }
 
     var config = {
-        debugMode: false
+        debugMode: true
     };
 
     /**
@@ -39,10 +39,15 @@
         });
     }
 
+    function compile (vm, el) {
+        debug(`SDB: ${vm}, SDB.$el: ${el}`);
+    }
+
     function SDB (options) {
         this._init(options);
         this._observe();
         this._proxy();
+        this._compile();
     }
 
     SDB.config = config;
@@ -78,6 +83,21 @@
                 }
             });
         });
+    };
+
+    /**
+     * 解析 SDB.$el 及其 childNodes 中的 textNode
+     * 为每个有效的 token 设置一个 Watcher
+     */
+    SDB.prototype._compile = function () {
+        compile(this, this.$el);
+    };
+
+    /**
+     * 用于判断一个对象是否为 SDB 的实例
+     */
+    SDB.prototype.toString = function () {
+        return "[SDB instance]";
     };
 
     return SDB;

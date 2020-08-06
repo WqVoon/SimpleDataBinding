@@ -3,5 +3,5 @@ export default function debug (msg) {
 }
 
 export var config = {
-    debugMode: false
+    debugMode: true
 };
