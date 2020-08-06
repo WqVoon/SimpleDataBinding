@@ -1,0 +1,12 @@
+{
+  "name": "SimpleDataBinding",
+  "version": "1.0.0",
+  "description": "A simple data binding practice",
+  "main": "src/main.js",
+  "scripts": {
+    "build": "node build/build.js"
+  },
+  "dependencies": {
+    "rollup": "^2.23.0"
+  }
+}

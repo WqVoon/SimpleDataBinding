@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+    <script src="../dist/SDB.js"></script>
+</head>
+<body>
+    <div id="app">
+        {{name}}: {{hobby}}
+    </div>
+    <script>
+        var vm = new SDB({
+            el: "#app",
+            data: {
+                name: "Yuren",
+                hobby: "Program"
+            }
+        });
+    </script>
+</body>
+</html>
